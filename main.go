@@ -18,13 +18,17 @@ var (
 	Green         = color.New(color.FgGreen)
 	Yellow        = color.New(color.FgYellow)
 	Cyan          = color.New(color.FgCyan)
-	vie           = 8
+	vie           = 10
 )
 
 func main() {
 	ClearConsole()
+	vie = 10
+	lettresTried = []string{}
+	lettresBonnes = []string{}
 	mot := selectMot()
 	fmt.Println(mot)
+
 	for !(motTrouve(mot, lettresTried)) && vie > 0 {
 		ClearConsole()
 		lettre := playerRound(mot)
@@ -37,17 +41,48 @@ func main() {
 		ClearConsole()
 		Green.Println("Vous avez gagné !")
 		Cyan.Println("Le mot était : ", mot)
+		restart()
 	} else {
 		ClearConsole()
+		affichePendu(vie)
 		Red.Println("Vous avez perdu !")
 		Cyan.Println("Le mot était : ", mot)
+		restart()
 	}
 }
 
 func selectMot() string {
+	var choix int
+	var fileName string
+	fmt.Println("Sélectionnez votre liste :")
+	fmt.Println("------------------------------------------")
+	Cyan.Println("[0] Liste personnalisée")
+	fmt.Println("[1] Mots français")
+	fmt.Println("[2] Plus grandes marques")
+	fmt.Println("[3] Prénoms les plus courants")
+	fmt.Println("[4] Pays")
+	fmt.Println("------------------------------------------")
+	fmt.Print(">> ")
+	fmt.Scanln(&choix)
+
 	rand.Seed(time.Now().Unix())
 
-	file, _ := os.Open("mots.txt")
+	switch choix {
+	case 0:
+		fmt.Println("Veuillez saisir le nom du fichier de votre liste")
+		fmt.Print(">> ")
+		fmt.Scanln(&fileName)
+	case 1:
+		fileName = "mots.txt"
+	case 2:
+		fileName = "marques.txt"
+	case 3:
+		fileName = "prenoms.txt"
+	case 4:
+		fileName = "pays.txt"
+	}
+
+	file, _ := os.Open(fileName)
 
 	defer file.Close()
 
@@ -81,6 +116,18 @@ func masquerMot(mot string, lettreTried []string) string {
 	return motMasque
 }
 
+func restart() {
+	var choix int
+	fmt.Println("----------------")
+	fmt.Println("[1] Recommencer")
+	fmt.Println("[Autre] Quitter")
+	fmt.Print(">> ")
+	fmt.Scanln(&choix)
+	if choix == 1 {
+		main()
+	}
+}
+
 func contientLettre(lettre string, lettreTried []string) bool {
 	for _, l := range lettreTried {
 		if lettre == l {
@@ -93,6 +140,10 @@ func contientLettre(lettre string, lettreTried []string) bool {
 func playerRound(mot string) string {
 	var lettre string
 	longueurMot := len(mot)
+
+	if vie < 10 {
+		affichePendu(vie)
+	}
 
 	for {
 		Cyan.Println("Le mot contient ", longueurMot, " lettres.")
@@ -126,9 +177,15 @@ func playerRound(mot string) string {
 			break
 		} else if lettreDansListe(lettre, lettresTried) {
 			ClearConsole()
+			if vie < 10 {
+				affichePendu(vie)
+			}
 			Red.Println("Vous avez déjà proposé cette lettre.")
 		} else {
 			ClearConsole()
+			if vie < 10 {
+				affichePendu(vie)
+			}
 			Red.Println("Saisie invalide. Veuillez entrer une lettre en minuscules.")
 		}
 	}
@@ -193,4 +250,83 @@ func lettreDansListe(lettre string, liste []string) bool {
 
 	// Si la lettre n'est pas trouvée dans la liste, renvoie false
 	return false
+}
+
+func affichePendu(vie int) {
+	switch vie {
+	case 9:
+		fmt.Println("\n=========")
+	case 8:
+		fmt.Println("      |  ")
+		fmt.Println("      |  ")
+		fmt.Println("      |  ")
+		fmt.Println("      |  ")
+		fmt.Println("      |  ")
+		fmt.Println("=========")
+	case 7:
+		fmt.Println("  +---+  ")
+		fmt.Println("      |  ")
+		fmt.Println("      |  ")
+		fmt.Println("      |  ")
+		fmt.Println("      |  ")
+		fmt.Println("      |  ")
+		fmt.Println("=========")
+	case 6:
+		fmt.Println("  +---+  ")
+		fmt.Println("  |   |  ")
+		fmt.Println("      |  ")
+		fmt.Println("      |  ")
+		fmt.Println("      |  ")
+		fmt.Println("      |  ")
+		fmt.Println("=========")
+	case 5:
+		fmt.Println("  +---+  ")
+		fmt.Println("  |   |  ")
+		fmt.Println("  O   |  ")
+		fmt.Println("      |  ")
+		fmt.Println("      |  ")
+		fmt.Println("      |  ")
+		fmt.Println("=========")
+	case 4:
+		fmt.Println("  +---+  ")
+		fmt.Println("  |   |  ")
+		fmt.Println("  O   |  ")
+		fmt.Println("  |   |  ")
+		fmt.Println("      |  ")
+		fmt.Println("      |  ")
+		fmt.Println("=========")
+	case 3:
+		fmt.Println("  +---+  ")
+		fmt.Println("  |   |  ")
+		fmt.Println("  O   |  ")
+		fmt.Println(" /|   |  ")
+		fmt.Println("      |  ")
+		fmt.Println("      |  ")
+		fmt.Println("=========")
+	case 2:
+		fmt.Println("  +---+  ")
+		fmt.Println("  |   |  ")
+		fmt.Println("  O   |  ")
+		fmt.Println(" /|\\  |  ")
+		fmt.Println("      |  ")
+		fmt.Println("      |  ")
+		fmt.Println("=========")
+	case 1:
+		fmt.Println("  +---+  ")
+		fmt.Println("  |   |  ")
+		fmt.Println("  O   |  ")
+		fmt.Println(" /|\\  |  ")
+		fmt.Println(" /    |  ")
+		fmt.Println("      |  ")
+		fmt.Println("=========")
+	case 0:
+		fmt.Println("  +---+  ")
+		fmt.Println("  |   |  ")
+		fmt.Println("  O   |  ")
+		fmt.Println(" /|\\  |  ")
+		fmt.Println(" / \\  |  ")
+		fmt.Println("      |  ")
+		fmt.Println("=========")
+
+	}
 }
