@@ -73,13 +73,13 @@ func selectMot() string {
 		fmt.Print(">> ")
 		fmt.Scanln(&fileName)
 	case 1:
-		fileName = "mots.txt"
+		fileName = "liste-mots/mots.txt"
 	case 2:
-		fileName = "marques.txt"
+		fileName = "liste-mots/marques.txt"
 	case 3:
-		fileName = "prenoms.txt"
+		fileName = "liste-mots/prenoms.txt"
 	case 4:
-		fileName = "pays.txt"
+		fileName = "liste-mots/pays.txt"
 	}
 
 	file, _ := os.Open(fileName)
