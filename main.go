@@ -32,8 +32,12 @@ func main() {
 	for !(motTrouve(mot, lettresTried)) && vie > 0 {
 		ClearConsole()
 		lettre := playerRound(mot)
-		lettresTried = append(lettresTried, lettre)
-		if !(lettreDansMot(lettre, mot)) {
+		if lettre != "&lostTried" {
+			lettresTried = append(lettresTried, lettre)
+			if !(lettreDansMot(lettre, mot)) {
+				vie--
+			}
+		} else {
 			vie--
 		}
 	}
@@ -54,9 +58,10 @@ func main() {
 func selectMot() string {
 	var choix int
 	var fileName string
+	validFile := false
 	fmt.Println("Sélectionnez votre liste :")
 	fmt.Println("------------------------------------------")
-	Cyan.Println("[0] Liste personnalisée")
+	Cyan.Println("[0] Importer une liste")
 	fmt.Println("[1] Mots français")
 	fmt.Println("[2] Plus grandes marques")
 	fmt.Println("[3] Prénoms les plus courants")
@@ -69,9 +74,21 @@ func selectMot() string {
 
 	switch choix {
 	case 0:
-		fmt.Println("Veuillez saisir le nom du fichier de votre liste")
-		fmt.Print(">> ")
-		fmt.Scanln(&fileName)
+		ClearConsole()
+		for !validFile {
+			fmt.Println("Veuillez saisir le nom du fichier de votre liste")
+			fmt.Print(">> ")
+			fmt.Scanln(&fileName)
+
+			file, err := os.Open(fileName)
+			if err != nil {
+				ClearConsole()
+				Red.Println("Erreur : le fichier '" + fileName + "' est introuvable.")
+			} else {
+				file.Close()
+				validFile = true
+			}
+		}
 	case 1:
 		fileName = "liste-mots/mots.txt"
 	case 2:
@@ -83,7 +100,6 @@ func selectMot() string {
 	}
 
 	file, _ := os.Open(fileName)
-
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
@@ -125,6 +141,9 @@ func restart() {
 	fmt.Scanln(&choix)
 	if choix == 1 {
 		main()
+	} else {
+		ClearConsole()
+		Red.Println("A bientôt !")
 	}
 }
 
@@ -170,6 +189,7 @@ func playerRound(mot string) string {
 			}
 		}
 		fmt.Println()
+
 		fmt.Print("Veuillez saisir une lettre : ")
 		fmt.Scanln(&lettre)
 
@@ -182,11 +202,27 @@ func playerRound(mot string) string {
 			}
 			Red.Println("Vous avez déjà proposé cette lettre.")
 		} else {
-			ClearConsole()
-			if vie < 10 {
-				affichePendu(vie)
+			if len(lettre) > 1 {
+				if lettre == mot {
+					ClearConsole()
+					for i := 0; i < len(mot); i++ {
+						lettresTried = append(lettresTried, string(mot[i]))
+					}
+					return string(mot[0])
+				} else {
+					ClearConsole()
+					if vie < 10 {
+						affichePendu(vie)
+					}
+					return "&lostTried"
+				}
+			} else {
+				ClearConsole()
+				if vie < 10 {
+					affichePendu(vie)
+				}
+				Red.Println("Veuillez saisir une seule lettre minuscule")
 			}
-			Red.Println("Saisie invalide. Veuillez entrer une lettre en minuscules.")
 		}
 	}
 	return lettre
